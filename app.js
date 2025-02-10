@@ -3,7 +3,6 @@ import express from 'express'
 import mysql from 'mysql2/promise'
 import bt from 'bcrypt'
 import z from 'zod'
-import { v4 as uuidv4 } from 'uuid';
 
 const PORT = process.env.PORT;
 
@@ -11,6 +10,7 @@ const app = express();
 app.use(express.json());
 
 const passwordSQL = process.env.PASSWORD_MYSQL
+const SALT = process.env.SALT_ROUND
 
 const optionsConnection={
     host:'localhost',
@@ -25,17 +25,20 @@ const db = mysql.createPool(optionsConnection);
 
 
 app.get('/api/games', async (req, res) => {
-    const result = await db.query('SELECT * FROM GameTag;') 
+    const result = await db.query('SELECT * FROM Games;') 
     res.status(200).send(result[0])
 });
 
-app.get('/api/games/:id',(req,res)=>{
-    res.status(200).send({message:"One game"});
+app.get('/api/games/:id',async (req,res)=>{
+    const id = req.params.id;
+    const result = await db.query(`SELECT * FROM Games WHERE game_id = ?`,id);
+    const row = result[0]
+    res.status(200).send(row);
 });
 
 app.post('/api/games',async (req,res)=>{
     const info = req.body
-    const id = uuidv4();
+    const id = crypto.randomUUID();
     const result = await db.query(`INSERT INTO 
         Games VALUES 
         (?,?,?,?,?,?,?,?,?)`,[id,info.title,info.genre,info.developer,
@@ -47,7 +50,7 @@ app.put('/api/games/:id',()=>{
     res.status(200).send({message:"game Edited"});
 })
 
-app.post('/api/reviews',(req,res)=>{
+app.post('/api/reviews',async (req,res)=>{
     res.status(201).send({message:"adding review"});
 })
 
@@ -57,6 +60,16 @@ app.get('/api/reviews',()=>{
 
 app.get('/api/reviews/:id',()=>{
     res.status(200).send({message:"One Review"});
+})
+
+app.post('/api/users',async (req,res)=>{
+    const info = req.body
+    const id = crypto.randomUUID();
+    const hashedPassword = bt.hashSync(info.password,10);
+    const result = await db.query(`INSERT INTO 
+        Users(user_id,username,email,passwd,profile_picture_ref) VALUES 
+        (?,?,?,?,?)`,[id,info.username,info.email,hashedPassword,info.profilePic]);
+    res.status(200).send(result[0]);
 })
 
 app.listen(PORT, () => {
