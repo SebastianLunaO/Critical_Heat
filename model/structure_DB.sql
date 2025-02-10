@@ -48,7 +48,7 @@ CREATE TABLE Users(
     user_id VARCHAR(255) DEFAULT '300d0e2e4530970fcfbcd6706bda49bd10316d856db3f5bf0915d2c45c8b751b',
     username VARCHAR(70) DEFAULT 'Critical_Heat_Site',
     email VARCHAR(80),
-    passwd VARCHAR(40),
+    passwd VARCHAR(150),
     profile_picture_ref VARCHAR(255),
     join_date DATE NOT NULL DEFAULT (CURRENT_DATE),
     CONSTRAINT USER_PK PRIMARY KEY (user_id)
