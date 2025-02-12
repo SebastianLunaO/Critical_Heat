@@ -3,6 +3,7 @@ import express from 'express'
 import mysql from 'mysql2/promise'
 import bt from 'bcrypt'
 import z from 'zod'
+import { Games } from './model/baseModel';
 
 const PORT = process.env.PORT;
 
@@ -37,13 +38,9 @@ app.get('/api/games/:id',async (req,res)=>{
 });
 
 app.post('/api/games',async (req,res)=>{
-    const info = req.body
-    const id = crypto.randomUUID();
-    const result = await db.query(`INSERT INTO 
-        Games VALUES 
-        (?,?,?,?,?,?,?,?,?)`,[id,info.title,info.genre,info.developer,
-            info.publisher,info.release_date,info.descp,info.cover_ref,info.Base_price]);
-    res.status(201).send(result[0]);
+    const info = req.body;
+    const result = await Games.create(info);
+    res.status(201).send(result);
 })
 
 app.put('/api/games/:id',()=>{
