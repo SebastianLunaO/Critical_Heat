@@ -3,6 +3,7 @@ import express from 'express'
 import mysql from 'mysql2/promise'
 import bt from 'bcrypt'
 import z from 'zod'
+import { Games } from './model/baseModel.js';
 
 const PORT = process.env.PORT;
 
@@ -29,21 +30,22 @@ app.get('/api/games', async (req, res) => {
     res.status(200).send(result[0])
 });
 
-app.get('/api/games/:id',async (req,res)=>{
-    const id = req.params.id;
-    const result = await db.query(`SELECT * FROM Games WHERE game_id = ?`,id);
-    const row = result[0]
-    res.status(200).send(row);
+app.get('/api/games/id/:id',async (req,res)=>{
+    const id = req.params.id
+    const result = await Games.getByID(id)
+    res.status(200).send(result);
+});
+
+app.get('/api/games/name/:name',async (req,res)=>{
+    const name = req.params.name
+    const result = await Games.getByID(name)
+    res.status(200).send(result);
 });
 
 app.post('/api/games',async (req,res)=>{
-    const info = req.body
-    const id = crypto.randomUUID();
-    const result = await db.query(`INSERT INTO 
-        Games VALUES 
-        (?,?,?,?,?,?,?,?,?)`,[id,info.title,info.genre,info.developer,
-            info.publisher,info.release_date,info.descp,info.cover_ref,info.Base_price]);
-    res.status(201).send(result[0]);
+    const info = req.body;
+    const result = await Games.create(info);
+    res.status(201).send(result);
 })
 
 app.put('/api/games/:id',()=>{
