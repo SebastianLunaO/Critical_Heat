@@ -3,31 +3,19 @@ import express from 'express'
 import mysql from 'mysql2/promise'
 import bt from 'bcrypt'
 import z from 'zod'
-import { Games } from './model/baseModel.js';
+import { Games,User } from './model/baseModel.js';
 
 const PORT = process.env.PORT;
 
 const app = express();
 app.use(express.json());
 
-const passwordSQL = process.env.PASSWORD_MYSQL
-const SALT = process.env.SALT_ROUND
-
-const optionsConnection={
-    host:'localhost',
-    port: 3306,
-    user: 'root',
-    password: passwordSQL,
-    database: 'Critical_Heat'
-}
-
-const db = mysql.createPool(optionsConnection);
 
 
 
 app.get('/api/games', async (req, res) => {
-    const result = await db.query('SELECT * FROM Games;') 
-    res.status(200).send(result[0])
+    const result = await Games.getAll()
+    res.status(200).send(result)
 });
 
 app.get('/api/games/id/:id',async (req,res)=>{
@@ -66,12 +54,23 @@ app.get('/api/reviews/:id',()=>{
 
 app.post('/api/users',async (req,res)=>{
     const info = req.body
-    const id = crypto.randomUUID();
-    const hashedPassword = bt.hashSync(info.password,10);
-    const result = await db.query(`INSERT INTO 
-        Users(user_id,username,email,passwd,profile_picture_ref) VALUES 
-        (?,?,?,?,?)`,[id,info.username,info.email,hashedPassword,info.profilePic]);
-    res.status(200).send(result[0]);
+    try {
+        const result = await User.create(info)
+        res.status(201).send(result);
+    } catch (error) {
+        res.status(300).send({message:"Error on the submit data"})
+    }
+})
+
+app.get('/api/users/:id',async (req,res)=>{
+    const info= req.params
+    try {
+        const result = await User.getByID(info.id)
+        res.status(200).send(result);
+    } catch (error) {
+        res.status(404)
+    }
+    
 })
 
 app.listen(PORT, () => {
