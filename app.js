@@ -20,7 +20,7 @@ app.get('/api/games', async (req, res) => {
 
 app.get('/api/games/id/:id',async (req,res)=>{
     const id = req.params.id
-    const result = await Games.getByID(id)
+    const result = await Games.getByID(id)   
     res.status(200).send(result);
 });
 
@@ -36,8 +36,10 @@ app.post('/api/games',async (req,res)=>{
     res.status(201).send(result);
 })
 
-app.put('/api/games/:id',()=>{
-    res.status(200).send({message:"game Edited"});
+app.put('/api/games/id/:id',async (req,res)=>{
+    const info = req.body
+    const result = await Games.edit(info)
+    res.status(200).send(result);
 })
 
 app.post('/api/reviews',async (req,res)=>{
