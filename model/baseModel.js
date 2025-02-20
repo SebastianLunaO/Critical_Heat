@@ -65,6 +65,29 @@ export class Games {
         return result[0]
     }
 
+    static async edit(game_info){
+        const exists = await this.getByID(game_info.id)
+            if ((exists===undefined)){
+            throw new Error("Username already exists");
+            return error
+            }
+        const result = await db.query(`UPDATE Games 
+            SET
+            title = ?,
+            genre = ?,
+            developer = ?,
+            publisher = ?,
+            release_date = ?,
+            descp = ?,
+            cover_ref = ?,
+            Base_price = ?
+            WHERE game_id = ?`,[game_info.title,game_info.genre,game_info.developer,game_info.publisher,game_info.release_date,game_info.descp,
+                game_info.cover_ref,game_info.Base_price,game_info.id]);
+        
+        const row = await this.getByID(game_info.id)
+        return row 
+    }
+
 }
 
 export class User {
