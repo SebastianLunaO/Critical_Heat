@@ -96,6 +96,7 @@ export class User {
 
             const exists = await this.getByName(info.username)
             if (!(exists===undefined)){
+            console.log("Already exist")
             throw new Error("Username already exists");
             return error
              }
@@ -121,5 +122,9 @@ export class User {
             FROM Users WHERE username = ?`,name);
         const row = result[0][0]
         return row
+    }
+
+    static async login(user_info){
+        
     }
 }
