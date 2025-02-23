@@ -21,6 +21,11 @@ const user = z.object({
     profileP: z.string(),
 })
 
+const userLogin = z.object({
+    username: z.string(),
+    psswd: z.string(),
+});
+
 const passwordSQL = process.env.PASSWORD_MYSQL
 const SALT = process.env.SALT_ROUND
 
@@ -124,7 +129,17 @@ export class User {
         return row
     }
 
-    static async login(user_info){
-        
+    static async login(user_login){
+        const info = userLogin.parse(user_login)
+
+            const user = await this.getByName(info.username)
+            if ((user===undefined)){
+            throw new Error("User does not exist");
+            }
+            
+        const isValid = await bt.compare(info.psswd,user.passwd)
+        if(!isValid) throw new Error('username or password invalid');
+        const {passwd: _, ...publicUser} = user
+        return user
     }
 }
